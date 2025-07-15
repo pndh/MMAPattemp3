@@ -1,0 +1,4 @@
+- You may get the "OSError: libopenslide.so.0: cannot open shared object file: No such file or directory" error
+
+In such case, first open the directory where openslide-bin is installed (path/to/your/libraries/python-version/site-packages/openslide_bin/). Here, you will find a file named "libopenslide.so.0" or "libopenslide.so.1". Regardless, rename it to "libopenslide.so.0" and copy.
+Then, open the directory where the openslide library is installed (path/to/your/libraries/python-version/site-packages/openslide/) and paste the file you just copied into the directory. Afterwards, open the file "lowlevel.py", change the code on line 60 from "libopenslide.so.0" to "path/to/your/libraries/python-version/site-packages/openslide/" and try rerunning your code. The openslide library should work fine after this.

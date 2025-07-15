@@ -1,0 +1,3 @@
+Min centers per WSI: 178
+Max centers per WSI: 712
+Average centers per WSI: 362.11
