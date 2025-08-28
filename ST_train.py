@@ -36,7 +36,7 @@ wandb_logger = WandbLogger(project="ST", entity="dacthai2807", name="WSUNI_adapk
 fold = 5
 tag = '-htg_her2st_785_32_cv'
 
-mode = "WSUNI"#input("Choose model to train [Histogene/ST-Net/UNI/WS_UNI]: ")
+mode = "UNI"#input("Choose model to train [Histogene/ST-Net/UNI/WS_UNI]: ")
 
 if mode == "Histogene":
     dataset = ViT_HER2ST(train=True, fold=fold)
@@ -49,7 +49,7 @@ if mode == "Histogene":
 
 elif mode == "UNI":
     checkpoint_callback = ModelCheckpoint(
-        dirpath='model_ckpts/UNI_final',
+        dirpath='model_ckpts/UNI7_final',
         filename='UNI_every5epoch_'+tag+'_'+str(fold)+'_{epoch}',
         save_top_k=-1,
         every_n_epochs=5,
@@ -83,7 +83,7 @@ elif mode == "WSUNI":
         save_last=True
     )
 
-    dataset = WSUNI_HER2ST(train=True, fold=fold, cache_dir='cache_features_train/', topk=40)
+    dataset = WSUNI_HER2ST(train=True, fold=fold, cache_dir='cache_features_train9_huy/', topk=40)
     train_loader = DataLoader(dataset, batch_size=16, num_workers=1, shuffle=True)
 
     model = WSUNI(

@@ -99,7 +99,7 @@ class CrossAttention(nn.Module):
         out =  self.to_out(out)
         return out
     
-
+from huggingface_hub import login
 class UNI(pl.LightningModule):
     def __init__(self, n_genes=1000, learning_rate=1e-4, max_epochs=100):
         super().__init__()
@@ -110,7 +110,7 @@ class UNI(pl.LightningModule):
         self.n_genes = n_genes
         
         self.simCL = SimilarityContrastiveLoss(0.2)
-        # login()
+        login('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')
         self.enc1 = timm.create_model("hf-hub:MahmoodLab/uni", pretrained=True, init_values=1e-5, dynamic_img_size=True)
         self.enc2 = timm.create_model("hf-hub:MahmoodLab/uni", pretrained=True, init_values=1e-5, dynamic_img_size=True)
         self.enc0 = timm.create_model("hf-hub:MahmoodLab/uni", pretrained=True, init_values=1e-5, dynamic_img_size=True)
@@ -135,20 +135,20 @@ class UNI(pl.LightningModule):
         cls_1, feat_1 = feat_1[:, 0, :], feat_1[:, 1:, :]
         cls_2, feat_2 = feat_2[:, 0, :], feat_2[:, 1:, :]
         
-        fused_all = torch.cat([cls_2.unsqueeze(1), feat_0, feat_1], dim=1)  # use feat 20x attend to 5x and 10x
+        fused_all = torch.cat([cls_0.unsqueeze(1), feat_1, feat_2], dim=1)  # use feat 20x attend to 5x and 10x
         # cont_cell = torch.cat([cls_cont.unsqueeze(1), feat_cell], dim=1)
         
-        fused_cls_2 = self.attn_01(fused_all)[:, 0, :]
+        fused_cls_0 = self.attn_01(fused_all)[:, 0, :]
         
-        out1 = self.gene_head1(fused_cls_2)
-        out2 = self.gene_head2(cls_2)
+        out1 = self.gene_head1(fused_cls_0)
+        out2 = self.gene_head2(cls_0)
         
         out = (out1 + out2) * 0.5
         
-        sim_loss = self.simCL(fused_cls_2, cls_2)
+        sim_loss = self.simCL(fused_cls_0, cls_0)
         
         # the below return is for the best
-        return out, fused_cls_2, sim_loss
+        return out, fused_cls_0, sim_loss
     
     def apply_lora_to_vit(self, lora_r, lora_alpha, first_layer_start=15):
         """

@@ -53,14 +53,14 @@ def extract_features():
     batch_size = 1
     num_workers = 4
     device = torch.device("cuda")
-    cache_dir = 'cache_features_test/'
+    cache_dir = 'cache_features_test9_huy/'
 
     os.makedirs(cache_dir, exist_ok=True)
 
     # Load dataset + model
     dataset = UNI_HER2ST(train=False, fold=fold)
     model = UNI.load_from_checkpoint(
-        "model_ckpts/UNI_final/UNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=44.ckpt",
+        "model_ckpts/UNI2_final/UNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=9.ckpt",
         n_genes=785, learning_rate=1e-5, max_epochs=50
     )
     model.eval().to(device)

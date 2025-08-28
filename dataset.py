@@ -342,40 +342,57 @@ class UNI_HER2ST(torch.utils.data.Dataset):
         return images
         
     def __getitem__(self, index):
+        # --- locate which slide / WSI ---
         i = 0
-        while index>=self.cumlen[i]:
+        while index >= self.cumlen[i]:
             i += 1
         idx = index
         if i > 0:
             idx = index - self.cumlen[i-1]
-        
-        exp = self.exp_dict[self.id2name[i]][idx]
-        center = self.center_dict[self.id2name[i]][idx]
-        loc = self.loc_dict[self.id2name[i]][idx]
 
-        # if self.cls or self.train==False:
+        # --- get labels / coordinates ---
+        exp = torch.Tensor(self.exp_dict[self.id2name[i]][idx])
+        loc = torch.Tensor(self.loc_dict[self.id2name[i]][idx])
+        x, y = self.center_dict[self.id2name[i]][idx]
+        r = self.r  # base radius
+        img = self.img_dict[self.id2name[i]]
+        img_w, img_h = img.size
 
-        exp = torch.Tensor(exp)
-        loc = torch.Tensor(loc)
-
-        x, y = center
+        # --- extract multi-scale patches ---
         patch = self.img_dict[self.id2name[i]].crop((x-self.r, y-self.r, x+self.r, y+self.r))
         patch = np.array(patch)
         
         if self.train:
             patch = self.augmentation(image=patch)['image']
+        big = []
+        small2, small4 = self.scale_crop(patch, scales = [2, 4]) 
         
-        ms_patches = self.scale_crop(patch)
-        
-        for i, p in enumerate(ms_patches):
-            ms_patches[i] = self.transform(p).float()
+        for scale in [2, 4]:
+            crop_r = r * scale
 
-        patch_0, patch_1, patch_2 = ms_patches
+            # clamp to image boundaries
+            x1 = max(int(x - crop_r), 0)
+            y1 = max(int(y - crop_r), 0)
+            x2 = min(int(x + crop_r), img_w)
+            y2 = min(int(y + crop_r), img_h)
+
+            patch = img.crop((x1, y1, x2, y2))
+            patch = patch.resize((2*r, 2*r), resample=Image.BILINEAR)
+            patch = np.array(patch)
+
+            if self.train:
+                patch = self.augmentation(image=patch)['image']
+
+            patch = self.transform(patch).float()
+            big.append(patch)
         
+        patch_0, patch_1, patch_2 = self.transform(small2).float(), big[0], big[1]
+
         if self.train:
             return patch_0, patch_1, patch_2, loc, exp
-        else: 
-            return patch_0, patch_1, patch_2, loc, exp, torch.Tensor(center)
+        else:
+            return patch_0, patch_1, patch_2, loc, exp, torch.Tensor((x, y))
+
 
     def __len__(self):
         return self.cumlen[-1]

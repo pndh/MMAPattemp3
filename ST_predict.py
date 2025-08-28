@@ -17,7 +17,7 @@ tag = '-htg_her2st_785_32_cv'
 
 #normal histogene prediction
 
-mode = 'WSUNI_2'# input("Choose model to predict [Histogene/ST-Net]: ")
+mode = 'UNI'# input("Choose model to predict [Histogene/ST-Net]: ")
 if mode == "Histogene":
     model = HisToGene.load_from_checkpoint("model_ckpts/histogene_last_train_"+tag+'_'+str(fold)+".ckpt",n_layers=8, n_genes=785, learning_rate=1e-5)
     device = torch.device("cuda")
@@ -47,7 +47,7 @@ if mode == "Histogene":
     sc.pl.spatial(adata_pred, img=None, color='FASN', spot_size=112, color_map='magma', save='histogene_FASN.png')
 
 elif mode == "UNI":
-    model = UNI.load_from_checkpoint("model_ckpts/UNI_final/UNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=39.ckpt", n_genes=785, learning_rate=1e-5, max_epochs=50)
+    model = UNI.load_from_checkpoint("model_ckpts/UNI7_final/UNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=9.ckpt", n_genes=785, learning_rate=1e-5, max_epochs=50)
     device = torch.device("cuda")
     dataset = UNI_HER2ST(train=False,fold=fold)
     test_loader = DataLoader(dataset, batch_size=1, num_workers=1)
@@ -74,7 +74,7 @@ elif mode == "UNI":
     sc.pl.spatial(adata_pred, img=None, color='FASN', spot_size=112, color_map='magma', save='UNI_FASN.png')
     
 elif mode == "WSUNI":
-    model = WSUNI.load_from_checkpoint("model_ckpts/WSUNI_adapk_50epoch/WSUNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=44.ckpt", n_genes=785, learning_rate=1e-5, max_epochs=50)
+    model = WSUNI.load_from_checkpoint("model_ckpts/WSUNI_adapk_pos_50epoch/WSUNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=44.ckpt", n_genes=785, learning_rate=1e-5, max_epochs=50)
     device = torch.device("cuda")
     dataset = WSUNI_HER2ST(train=False, fold=fold, cache_dir='cache_features_test_saved', topk=40)
     test_loader = DataLoader(dataset, batch_size=16, num_workers=1)
@@ -101,9 +101,9 @@ elif mode == "WSUNI":
     sc.pl.spatial(adata_pred, img=None, color='FASN', spot_size=112, color_map='magma', save='WSUNI_FASN.png')
     
 if mode == "WSUNI_2":
-    model = WSUNI.load_from_checkpoint("model_ckpts/WSUNI_adapk_50epoch/WSUNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=49.ckpt", n_genes=785, learning_rate=1e-5, max_epochs=50)
+    model = WSUNI.load_from_checkpoint("model_ckpts/WSUNI_adapk_pos_50epoch/WSUNI_every5epoch_-htg_her2st_785_32_cv_5_epoch=49-v18.ckpt", n_genes=785, learning_rate=1e-5, max_epochs=50)
     device = torch.device("cuda")
-    dataset = WSUNI_SliceLevel_HER2ST(train=False, fold=fold, cache_dir='cache_features_test_saved', topk=40)
+    dataset = WSUNI_SliceLevel_HER2ST(train=False, fold=fold, cache_dir='cache_features_test9_huy', topk=40)
     test_loader = DataLoader(dataset, batch_size=1, num_workers=4)
    
     label = None
@@ -170,7 +170,7 @@ if mode == "WSUNI_2":
     print('MAE:', np.nanmean(MAE))
 
     import matplotlib.image as mpimg
-    img = mpimg.imread("/home/jovyan/shared/tienhuu060102/spatial-transcriptomics/E1_new.png")
+    img = mpimg.imread("/mnt/disk3/pndhuy/images/A1_new.png")
 
     trace = 0
     for i in range(len(dataset)):
